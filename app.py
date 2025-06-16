@@ -36,6 +36,11 @@ def get_webdriver():
     chrome_options.add_argument("--remote-debugging-port=9222")
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--allow-running-insecure-content")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    chrome_options.add_argument("--disable-features=TranslateUI")
+    chrome_options.add_argument("--disable-ipc-flooding-protection")
     
     # Try different Chrome binary locations for different deployment platforms
     import os
@@ -47,6 +52,8 @@ def get_webdriver():
         "/usr/bin/chromium-browser", 
         "/usr/bin/google-chrome",
         "/usr/bin/google-chrome-stable",
+        "/opt/chrome/chrome",
+        "/opt/google/chrome/chrome",
         shutil.which("chromium"),
         shutil.which("google-chrome"),
         shutil.which("chrome")
@@ -56,21 +63,52 @@ def get_webdriver():
     for path in chrome_paths:
         if path and os.path.exists(path):
             chrome_binary = path
+            st.info(f"Found Chrome at: {chrome_binary}")
             break
     
     if chrome_binary:
         chrome_options.binary_location = chrome_binary
     
+    # For Railway and other cloud platforms, try to use system Chrome
+    from selenium.webdriver.chrome.service import Service
+    
     try:
+        # Try to create driver with default settings first
         driver = webdriver.Chrome(options=chrome_options)
+        st.success("✅ Chrome WebDriver initialized successfully!")
         return driver
     except Exception as e:
-        st.error(f"Failed to initialize Chrome WebDriver: {e}")
-        st.info("This app requires Chrome WebDriver to function. If running locally, please ensure Chrome is installed.")
+        error_msg = str(e)
+        st.error(f"Failed to initialize Chrome WebDriver: {error_msg}")
+        
+        # Provide helpful error information
+        if "chrome" in error_msg.lower() or "chromedriver" in error_msg.lower():
+            st.error("❌ Chrome/ChromeDriver not found")
+            st.markdown("""
+            **This error means Chrome is not installed on the server.** 
+            
+            **For Railway deployment:**
+            1. Chrome needs to be installed via system packages
+            2. The current Railway deployment may not have Chrome available
+            3. Try using a different deployment platform like Heroku
+            
+            **Alternative solutions:**
+            - Deploy to Heroku (has Chrome buildpacks)
+            - Use a Docker-based deployment with Chrome pre-installed
+            - Deploy to a platform that supports custom system packages
+            """)
+        
         if chrome_binary:
             st.info(f"Found Chrome at: {chrome_binary}")
         else:
-            st.info("No Chrome binary found in standard locations.")
+            st.warning("No Chrome binary found in standard locations.")
+            
+        # List what we checked
+        st.markdown("**Checked locations:**")
+        for path in chrome_paths:
+            exists = "✅" if path and os.path.exists(path) else "❌"
+            st.text(f"{exists} {path}")
+        
         return None
 
 def extract_enrollment_from_detail_page(driver, class_nbr):
