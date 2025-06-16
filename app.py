@@ -33,18 +33,44 @@ def get_webdriver():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--remote-debugging-port=9222")
+    chrome_options.add_argument("--disable-web-security")
+    chrome_options.add_argument("--allow-running-insecure-content")
     
-    # For Streamlit Cloud deployment
-    chrome_options.binary_location = "/usr/bin/chromium"
+    # Try different Chrome binary locations for different deployment platforms
+    import os
+    import shutil
+    
+    # Check for Chrome/Chromium in common locations
+    chrome_paths = [
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser", 
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        shutil.which("chromium"),
+        shutil.which("google-chrome"),
+        shutil.which("chrome")
+    ]
+    
+    chrome_binary = None
+    for path in chrome_paths:
+        if path and os.path.exists(path):
+            chrome_binary = path
+            break
+    
+    if chrome_binary:
+        chrome_options.binary_location = chrome_binary
     
     try:
         driver = webdriver.Chrome(options=chrome_options)
         return driver
     except Exception as e:
         st.error(f"Failed to initialize Chrome WebDriver: {e}")
-        st.info("This app requires Chrome WebDriver to function. Please ensure you're running on a compatible platform.")
+        st.info("This app requires Chrome WebDriver to function. If running locally, please ensure Chrome is installed.")
+        if chrome_binary:
+            st.info(f"Found Chrome at: {chrome_binary}")
+        else:
+            st.info("No Chrome binary found in standard locations.")
         return None
 
 def extract_enrollment_from_detail_page(driver, class_nbr):
