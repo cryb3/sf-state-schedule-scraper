@@ -5,4 +5,4 @@ nixPkgs = ["python3", "chromium"]
 cmds = ["python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt"]
 
 [phases.start]
-cmd = "streamlit run app.py --server.port=$PORT --server.address=0.0.0.0" 
+cmd = "sh -c 'streamlit run app.py --server.port=$PORT --server.address=0.0.0.0'" 
