@@ -1,0 +1,7 @@
+bucket_type,bucket,sections,total_enrollment
+days_per_week,one_day,56,2014
+days_per_week,two_plus,36,1377
+days_per_week,unknown,14,555
+start_time,morning,1,40
+start_time,late,91,3351
+start_time,unknown,14,555
