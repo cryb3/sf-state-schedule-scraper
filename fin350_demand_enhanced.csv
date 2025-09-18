@@ -1,0 +1,8 @@
+bucket_group,bucket,sections,offered_seats,enrolled,fill_rate
+days_per_week,one_day,38,1513,1255,0.829
+days_per_week,two_days,21,884,803,0.908
+days_per_week,online,15,634,620,0.978
+time_of_day,three_or_later,45,1806,1482,0.821
+time_of_day,noon_to_three,13,551,536,0.973
+time_of_day,online,15,634,620,0.978
+time_of_day,before_noon,1,40,40,1.000
